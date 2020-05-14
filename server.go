@@ -18,6 +18,7 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -75,6 +76,21 @@ func startService() int {
 	}
 
 	return ExitStatusOK
+}
+
+// stopService stop the HTTPserver and returns error code
+func stopService() int {
+	errCode := ExitStatusOK
+
+	if serverInstance != nil {
+		err := serverInstance.Stop(context.TODO())
+		if err != nil {
+			log.Error().Err(err).Msg("HTTP(s) server stop error")
+			errCode = ExitStatusServerError
+		}
+	}
+
+	return errCode
 }
 
 func printInfo(msg string, val string) {
@@ -159,7 +175,7 @@ func handleCommand(command string) int {
 		if errCode != 0 {
 			return errCode
 		}
-		return ExitStatusOK
+		return stopService()
 	case "help", "print-help":
 		return printHelp()
 	case "print-config":

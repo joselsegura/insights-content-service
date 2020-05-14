@@ -20,6 +20,7 @@ limitations under the License.
 package server
 
 import (
+	"context"
 	"net/http"
 	"path/filepath"
 
@@ -65,8 +66,13 @@ func (server *HTTPServer) Start() error {
 	return nil
 }
 
+// Stop stops server's execution
+func (server HTTPServer) Stop(ctx context.Context) error {
+	return server.Serv.Shutdown(ctx)
+}
+
 // Initialize perform the server initialization
-func (server *HTTPServer) Initialize(address string) http.Handler {
+func (server HTTPServer) Initialize(address string) http.Handler {
 	log.Info().Msgf("Initializing HTTP server at '%s'", address)
 
 	router := mux.NewRouter().StrictSlash(true)
@@ -75,7 +81,7 @@ func (server *HTTPServer) Initialize(address string) http.Handler {
 	return router
 }
 
-func (server *HTTPServer) addEndpointsToRouter(router *mux.Router) {
+func (server HTTPServer) addEndpointsToRouter(router *mux.Router) {
 	apiPrefix := server.Config.APIPrefix
 	openAPIURL := apiPrefix + filepath.Base(server.Config.APISpecFile)
 
